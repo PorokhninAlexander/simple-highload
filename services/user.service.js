@@ -1,10 +1,12 @@
 import {Op} from "sequelize";
-import {ServiceError} from "../helpers/service-error.js";
+import {ServiceErrorException} from "../helpers/service-error.helper.js";
 import orm from '../orm/models/index.js';
+import {delay, getRandomInt} from "../helpers/utils.helper.js";
+import Timings from "../constants/timings.js";
 const { User } = orm;
 
 
-export const changeUserBalance = async (userId, amount) => {
+const changeUserBalance = async (userId, amount) => {
     try {
         const [[, updatedCount]] = await User.decrement('balance', {
             by: amount,
@@ -21,15 +23,33 @@ export const changeUserBalance = async (userId, amount) => {
                 }
             });
             if (!user) {
-                throw new ServiceError(404, "User not found.")
+                throw new ServiceErrorException(404, "User not found.")
             }
-            throw new ServiceError(400, "User does not have enough balance.")
+            throw new ServiceErrorException(400, "User does not have enough balance.")
         }
     } catch (error) {
         console.error(error);
-        if (error instanceof ServiceError) {
+        if (error instanceof ServiceErrorException) {
             throw error;
         }
-        throw new ServiceError()
+        throw new ServiceErrorException()
     }
+}
+
+const getUserBalanceWithRandomDelay = async () => {
+    await delay(getRandomInt(Timings.minToMs * 2, Timings.minToMs * 3));
+    return (await User.findOne({}))?.balance
+}
+const checkUserWithRandomDelayAndError = async () => {
+    await delay(getRandomInt(Timings.minToMs * 2, Timings.minToMs * 3));
+    const user = await User.findOne({});
+    if(user) {
+        throw new ServiceErrorException(404, "User exist.")
+    }
+}
+
+export {
+    changeUserBalance,
+    getUserBalanceWithRandomDelay,
+    checkUserWithRandomDelayAndError
 }
