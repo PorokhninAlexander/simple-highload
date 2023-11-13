@@ -1,9 +1,6 @@
 import Router from 'express';
-import orm from '../orm/models/index.js';
 import {changeUserBalance} from "../services/user.service.js";
-import {isId, isNumber} from "../helpers/validators.js";
-
-const { User: UserController } = orm;
+import {isId, isNumber} from "../helpers/validators.helper.js";
 
 const router = Router();
 

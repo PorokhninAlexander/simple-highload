@@ -1,4 +1,4 @@
-export class ServiceError {
+export class ServiceErrorException {
     status = 500;
     message = "Something went wrong.";
     constructor(status, message) {
